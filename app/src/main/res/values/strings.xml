@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">NguyenThiKimChi</string>
+    <!-- Tiêu đề -->
+    <string name="register_title">Đăng Ký</string>
+    <string name="login_title">Đăng Nhập</string>
+
+    <!-- Nhãn và hint -->
+    <string name="hint_username">Tên đăng nhập</string>
+    <string name="hint_password">Mật khẩu</string>
+    <string name="register_button">Đăng Ký</string>
+    <string name="login_button">Đăng Nhập</string>
+
+    <!-- Link chuyển màn -->
+    <string name="register_link">Chưa có tài khoản? Đăng ký</string>
+    <string name="login_link">Đã có tài khoản? Đăng nhập</string>
+
+    <!-- Toast -->
+    <string name="register_success">Đăng ký thành công</string>
+    <string name="login_success">Đăng nhập thành công</string>
+    <string name="login_failed">Sai tài khoản hoặc mật khẩu</string>
+    <string name="input_required">Vui lòng nhập đủ thông tin</string>
+
+    <!-- Home -->
+    <string name="home_welcome">Chào mừng bạn đã đăng nhập!</string>
+    <string name="home_back">Quay lại</string>
+
+    <!--meu-->
+    <string name="restaurant_name">Nhà hàng Kim Chi</string>
+    <string name="btn_menu">Xem Thực Đơn</string>
+    <string name="btn_book">Đặt bàn</string>
+    <string name="btn_contact">Liên hệ</string>
+    <string name="categories">Categories</string>
+    <string name="japan">Japan</string>
+    <string name="vietnam">VietNam</string>
+    <string name="italy">Italy</string>
+    <string name="korea">Korea</string>
+    <string name="trending">Trending Food</string>
+
+</resources>
