@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,7 +34,10 @@ public class FoodLargeAdapter extends RecyclerView.Adapter<FoodLargeAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position) {
         FoodItem food = foodList.get(position);
         holder.tvName.setText(food.getName());
-        holder.imgFood.setImageResource(food.getImageResId());
+        Glide.with(context)
+                .load(food.getImageUrl())
+                .into(holder.imgFood);
+
     }
 
     @Override

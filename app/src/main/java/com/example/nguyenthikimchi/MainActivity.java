@@ -15,8 +15,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.example.nguyenthikimchi.api.ApiService;
+import com.example.nguyenthikimchi.api.RetrofitClient;
+import com.example.nguyenthikimchi.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,33 +43,20 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
-        initViews();
-        setupListeners();
-
-        // Kích hoạt hiệu ứng nền động
-        View root = findViewById(android.R.id.content);
-        Drawable background = root.getBackground();
-        if (background instanceof AnimationDrawable) {
-            AnimationDrawable animationDrawable = (AnimationDrawable) background;
-            animationDrawable.setEnterFadeDuration(2000);
-            animationDrawable.setExitFadeDuration(4000);
-            animationDrawable.start();
+        // ✅ Nếu đã đăng nhập thì vào Home luôn
+        if (sharedPreferences.getBoolean("is_logged_in", false)) {
+            String username = sharedPreferences.getString("username", "");
+            startHome(username);
+            return;
         }
 
-        // Gradient cho tiêu đề
-        TextView tvRegisterTitle = findViewById(R.id.tvRegisterTitle);
-        TextView tvLoginTitle = findViewById(R.id.tvLoginTitle);
+        initViews();
+        setupListeners();
+        setupGradientAndAnimation();
 
-        Shader shader = new LinearGradient(
-                0, 0, 0, tvRegisterTitle.getTextSize(),
-                new int[]{
-                        Color.parseColor("#21D4FD"),
-                        Color.parseColor("#B721FF")
-                },
-                null, Shader.TileMode.CLAMP);
-
-        tvRegisterTitle.getPaint().setShader(shader);
-        tvLoginTitle.getPaint().setShader(shader);
+        boolean showRegister = getIntent().getBooleanExtra("show_register", false);
+        cardLogin.setVisibility(showRegister ? View.GONE : View.VISIBLE);
+        cardRegister.setVisibility(showRegister ? View.VISIBLE : View.GONE);
     }
 
     private void initViews() {
@@ -87,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
             cardRegister.setVisibility(View.VISIBLE);
         });
 
+        // 🔐 Xử lý đăng ký tài khoản
         btnRegister.setOnClickListener(v -> {
             String username = etRegisterUsername.getText().toString().trim();
             String password = etRegisterPassword.getText().toString().trim();
@@ -96,34 +93,108 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Lưu vào SharedPreferences
-            sharedPreferences.edit()
-                    .putString("username", username)
-                    .putString("password", password)
-                    .apply();
+            ApiService api = RetrofitClient.getRetrofit().create(ApiService.class);
+            api.getUserByUsername(username).enqueue(new Callback<List<User>>() {
+                @Override
+                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        Toast.makeText(MainActivity.this, "Tên tài khoản đã tồn tại", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ✅ Tiến hành đăng ký
+                        User newUser = new User(username, password);
+                        api.register(newUser).enqueue(new Callback<User>() {
+                            @Override
+                            public void onResponse(Call<User> call, Response<User> response) {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(MainActivity.this, "Đăng ký thành công. Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
+                                    cardRegister.setVisibility(View.GONE);
+                                    cardLogin.setVisibility(View.VISIBLE);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Lỗi khi đăng ký", Toast.LENGTH_SHORT).show();
+                                }
+                            }
 
-            Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
-            cardRegister.setVisibility(View.GONE);
-            cardLogin.setVisibility(View.VISIBLE);
+                            @Override
+                            public void onFailure(Call<User> call, Throwable t) {
+                                Toast.makeText(MainActivity.this, "Lỗi kết nối đến server", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<User>> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Lỗi kiểm tra tài khoản: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
+        // 🔐 Xử lý đăng nhập
         btnLogin.setOnClickListener(v -> {
             String username = etLoginUsername.getText().toString().trim();
             String password = etLoginPassword.getText().toString().trim();
 
-            // Lấy từ SharedPreferences
-            String registeredUsername = sharedPreferences.getString("username", "");
-            String registeredPassword = sharedPreferences.getString("password", "");
-
-            if (username.equals(registeredUsername) && password.equals(registeredPassword)) {
-                Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, HomeActivity.class);
-                intent.putExtra("username", username);
-                startActivity(intent);
-                // finish();
-            } else {
-                Toast.makeText(this, "Sai tên đăng nhập hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            ApiService api = RetrofitClient.getRetrofit().create(ApiService.class);
+            Call<List<User>> call = api.login(username, password);
+
+            call.enqueue(new Callback<List<User>>() {
+                @Override
+                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        User user = response.body().get(0);
+
+                        sharedPreferences.edit()
+                                .putBoolean("is_logged_in", true)
+                                .putString("username", user.getUsername())
+                                .apply();
+
+                        Toast.makeText(MainActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                        startHome(user.getUsername());
+                    } else {
+                        Toast.makeText(MainActivity.this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<User>> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
+    }
+
+    private void setupGradientAndAnimation() {
+        View root = findViewById(android.R.id.content);
+        Drawable background = root.getBackground();
+        if (background instanceof AnimationDrawable) {
+            AnimationDrawable animationDrawable = (AnimationDrawable) background;
+            animationDrawable.setEnterFadeDuration(2000);
+            animationDrawable.setExitFadeDuration(4000);
+            animationDrawable.start();
+        }
+
+        TextView tvRegisterTitle = findViewById(R.id.tvRegisterTitle);
+        TextView tvLoginTitle = findViewById(R.id.tvLoginTitle);
+
+        Shader shader = new LinearGradient(
+                0, 0, 0, tvRegisterTitle.getTextSize(),
+                new int[]{Color.parseColor("#21D4FD"), Color.parseColor("#B721FF")},
+                null, Shader.TileMode.CLAMP
+        );
+
+        tvRegisterTitle.getPaint().setShader(shader);
+        tvLoginTitle.getPaint().setShader(shader);
+    }
+
+    private void startHome(String username) {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("username", username);
+        startActivity(intent);
+        finish();
     }
 }

@@ -3,21 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/button_gradient">
+    android:background="#2D4F2B">
 
-    <!-- Thanh tìm kiếm + banner -->
+    <!-- Thanh trên cùng -->
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center_vertical"
+        android:background="#708A58" >
 
-        <!-- Thanh tìm kiếm -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp">
+
+    <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -25,67 +29,93 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    app:tint="#999999" />
+
                 <EditText
                     android:id="@+id/searchInput"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:hint="Tìm món ăn..."
-                    android:drawableStart="@android:drawable/ic_menu_search"
-                    android:paddingStart="16dp"
+                    android:hint="Freeship 0Đ mọi đơn*"
+                    android:paddingStart="8dp"
                     android:background="@android:color/transparent"
                     android:textColor="#000"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:inputType="text" />
 
-                <Button
-                    android:id="@+id/btnSearch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Tìm"
-                    android:backgroundTint="#F27A1A"
-                    android:textColor="#FFFFFF"
-                    android:minWidth="72dp"
+                <ImageView
+                    android:id="@+id/btnCamera"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp" />
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="#999999" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Banner có nút đặt bàn -->
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="12dp">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/bannerSlider"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/iconCart"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_cart" />
 
-<!--            &lt;!&ndash; Lớp phủ mờ &ndash;&gt;-->
-<!--            <View-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="#80000000" />-->
-            <Button
-                android:id="@+id/btnBookNow"
+
+            <TextView
+                android:id="@+id/badgeCart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ĐẶT BÀN NGAY"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="24dp"
-                android:backgroundTint="#6200EE"
                 android:textColor="#FFFFFF"
-                android:background="@drawable/button_gradient" />
+                android:background="@drawable/badge_background"
+                android:textSize="10sp"
+                android:padding="2dp"
+                android:layout_gravity="top|end"
+                android:gravity="center"
+                android:minWidth="16dp"
+                android:visibility="gone"
+                />
+        </FrameLayout>
 
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notify" />
+
+            <TextView
+                android:id="@+id/badgeNotify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/badge_background"
+                android:text="99+"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:padding="2dp"
+                android:layout_gravity="top|end"
+                android:gravity="center"
+                android:minWidth="16dp" />
         </FrameLayout>
     </LinearLayout>
 
-    <!-- Nội dung chính -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="300dp"
-        android:layout_marginBottom="60dp">
+        android:layout_marginTop="56dp"
+        android:layout_marginBottom="60dp"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -93,11 +123,31 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Danh mục thực đơn -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="12dp">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/bannerSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <Button
+                    android:id="@+id/btnBookNow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đặt bàn ngay"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="24dp"
+                    android:background="@drawable/button_gradient"
+                    android:textColor="#FFFFFF" />
+            </FrameLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Thực đơn của chúng tôi"
+                android:text="Danh mục"
                 android:textSize="18sp"
                 android:textStyle="italic"
                 android:layout_marginTop="16dp"
@@ -107,56 +157,51 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fillViewport="true"
                 android:scrollbars="none">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:gravity="center_vertical">
+                    android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/btnKhaiVi"
                         android:text="Khai vị"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:textColor="#FFFFFF"
-                        android:background="@drawable/chip_selected"
-                        android:paddingHorizontal="20dp" />
+                        android:background="@drawable/chip_unselected"
+                        android:textColor="#000000" />
 
                     <Button
+                        android:id="@+id/btnMonChinh"
                         android:text="Món chính"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:textColor="#000000"
                         android:background="@drawable/chip_unselected"
-                        android:paddingHorizontal="20dp" />
+                        android:textColor="#000000" />
 
                     <Button
-                        android:text="Canh - Tiềm - Sup"
+                        android:id="@+id/btnCanh"
+                        android:text="Canh-Súp"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:textColor="#000000"
                         android:background="@drawable/chip_unselected"
-                        android:paddingHorizontal="20dp" />
+                        android:textColor="#000000" />
 
                     <Button
+                        android:id="@+id/btnCom"
                         android:text="Cơm - Mì - Cháo"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:textColor="#000000"
                         android:background="@drawable/chip_unselected"
-                        android:paddingHorizontal="20dp" />
+                        android:textColor="#000000" />
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <!-- Món ăn nổi bật -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -164,19 +209,16 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="#F27A1A"
-                android:layout_marginBottom="8dp"
                 android:layout_marginTop="16dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/foodRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
                 android:nestedScrollingEnabled="false" />
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
@@ -185,6 +227,5 @@
         app:menu="@menu/bottom_menu"
         app:itemIconTint="@color/white"
         app:itemTextColor="@color/white"
-        android:background="@drawable/gradient_toolbar" />
-
+        android:background="#708A58" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

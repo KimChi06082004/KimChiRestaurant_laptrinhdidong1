@@ -1,38 +1,59 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp">
-
-    <ImageView
-        android:id="@+id/foodImage"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/food1" />
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="8dp"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingStart="12dp">
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/imgFood"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop" />
+
 
         <TextView
-            android:id="@+id/foodName"
+            android:id="@+id/txtFoodName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pizza"
-            android:textStyle="bold"
             android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
             android:textColor="#000" />
 
         <TextView
-            android:id="@+id/foodPrice"
+            android:id="@+id/txtFoodPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="120.000đ"
             android:textColor="#F27A1A"
             android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xem chi tiết"
+            android:textColor="#FFF"
+            android:backgroundTint="#F27A1A"
+            android:layout_marginTop="8dp" />
+        <Button
+            android:id="@+id/btnAddToCart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm giỏ hàng"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white"/>
+
     </LinearLayout>
-</LinearLayout>
+</androidx.cardview.widget.CardView>

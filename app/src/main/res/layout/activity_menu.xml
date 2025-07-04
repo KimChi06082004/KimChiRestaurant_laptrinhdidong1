@@ -1,49 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
     android:background="#FFF8E1">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="Thực đơn"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#D32F2F"
+        android:layout_gravity="center"
+        android:padding="16dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Thực đơn"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#D32F2F"
-            android:layout_gravity="center"
-            android:padding="16dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/menuRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
 
-        <!-- Món ăn 1 -->
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:src="@drawable/food1"
-            android:scaleType="centerCrop" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cơm trộn Hàn Quốc - 85.000đ"
-            android:textSize="16sp"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Món ăn 2 -->
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:src="@drawable/food2"
-            android:scaleType="centerCrop" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lẩu kim chi - 180.000đ"
-            android:textSize="16sp"
-            android:layout_marginBottom="12dp" />
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

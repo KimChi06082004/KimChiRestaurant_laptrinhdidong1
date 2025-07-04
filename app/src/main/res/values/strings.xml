@@ -35,5 +35,35 @@
     <string name="italy">Italy</string>
     <string name="korea">Korea</string>
     <string name="trending">Trending Food</string>
+    <string name="desc_search_icon">Search Icon</string>
+    <string name="desc_camera_icon">Camera Icon</string>
+    <string name="desc_cart_icon">Cart Icon</string>
+    <string name="desc_notify_icon">Notification Icon</string>
+    <string name="title_order_history">Quản lý đơn hàng</string>
+    <string name="title_edit_profile">Chỉnh sửa thông tin cá nhân</string>
+    <string name="title_favorite">Danh sách yêu thích</string>
 
+    <!-- Common texts -->
+    <string name="text_order_history">Lịch sử đơn hàng</string>
+    <string name="text_no_order">Chưa có dữ liệu đơn hàng...</string>
+    <string name="text_edit_username">Tên người dùng</string>
+    <string name="text_edit_password">Mật khẩu</string>
+    <string name="btn_save">Lưu thay đổi</string>
+    <string name="content_logo">Logo</string>
+    <string name="btn_checkout">Đặt hàng</string>
+    <string name="btn_logout">Đăng xuất</string>
+    <string name="btn_edit_profile">Chỉnh sửa trang cá nhân</string>
+    <string name="btn_order_history">Quản lý đơn hàng</string>
+    <!-- Edit Profile -->
+    <string name="hint_name">Họ và tên</string>
+    <string name="hint_gender">Giới tính</string>
+    <string name="hint_birthdate">Ngày sinh (dd/MM/yyyy)</string>
+    <string name="hint_phone">Số điện thoại</string>
+    <string name="hint_email">Email</string>
+
+    <!-- Notifications -->
+    <string name="notify_no_cart">Giỏ hàng trống!</string>
+    <string name="notify_checkout_success">Đặt hàng thành công!</string>
+    <string name="notify_fetch_error">Không nhận được dữ liệu</string>
+    <string name="notify_fetch_fail">Lỗi: %1$s</string>
 </resources>

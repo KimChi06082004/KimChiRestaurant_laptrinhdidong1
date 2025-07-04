@@ -4,10 +4,6 @@
         android:icon="@drawable/ic_home"
         android:title="Trang chủ" />
     <item
-        android:id="@+id/nav_cart"
-        android:icon="@drawable/ic_cart"
-        android:title="Giỏ hàng" />
-    <item
         android:id="@+id/nav_favorite"
         android:icon="@drawable/ic_favorite"
         android:title="Yêu thích" />
@@ -15,4 +11,8 @@
         android:id="@+id/nav_notify"
         android:icon="@drawable/ic_notification"
         android:title="Thông báo" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Tài khoản" />
 </menu>
