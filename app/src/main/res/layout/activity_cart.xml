@@ -18,48 +18,88 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- ✅ RecyclerView dưới Toolbar -->
+    <!-- ✅ RecyclerView: Danh sách sản phẩm -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCart"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="8dp"
+        android:padding="4dp"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/toolbarDetail"
         app:layout_constraintBottom_toTopOf="@id/summaryLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ Tổng tiền + nút Đặt hàng -->
+    <!-- ✅ View thông báo khi giỏ hàng trống -->
     <LinearLayout
-        android:id="@+id/summaryLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:id="@+id/layoutEmptyCart"
         android:orientation="vertical"
-        android:background="#F5F5F5"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbarDetail"
+        app:layout_constraintBottom_toTopOf="@id/summaryLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageView
+            android:id="@+id/imgEmptyCart"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_empty_cart"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/txtEmptyCart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giỏ hàng của bạn đang trống"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="italic"/>
+    </LinearLayout>
+
+    <!-- ✅ Footer: Tổng tiền + nút Mua hàng -->
+    <LinearLayout
+        android:id="@+id/summaryLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <CheckBox
+            android:id="@+id/checkboxSelectAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tất cả"
+            android:textColor="#000000"
+            android:layout_gravity="center_vertical"/>
+
         <TextView
             android:id="@+id/txtTotalPrice"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tổng: 0 đ"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="₫0"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginBottom="8dp" />
+            android:textColor="#FF0000"
+            android:layout_marginHorizontal="8dp"
+            android:layout_gravity="center_vertical"/>
 
         <Button
             android:id="@+id/btnCheckout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đặt hàng"
-            android:backgroundTint="#2D4F2B"
+            android:text="Mua hàng (0)"
+            android:backgroundTint="#FF5722"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:paddingVertical="12dp" />
+            android:paddingHorizontal="16dp"
+            android:layout_gravity="center_vertical"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

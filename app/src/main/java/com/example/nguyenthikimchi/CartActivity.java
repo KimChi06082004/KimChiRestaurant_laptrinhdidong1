@@ -1,19 +1,27 @@
 package com.example.nguyenthikimchi;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nguyenthikimchi.adapters.CartAdapter;
 import com.example.nguyenthikimchi.models.CartItem;
-import com.example.nguyenthikimchi.utils.CartManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
@@ -21,50 +29,112 @@ public class CartActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private TextView txtTotalPrice;
     private Button btnCheckout;
+    private CheckBox checkboxSelectAll;
+    private LinearLayout layoutEmptyCart;
+
+    private List<CartItem> cartList = new ArrayList<>();
     private CartAdapter adapter;
 
+    private String userId;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
-        // ✅ Thiết lập Toolbar có mũi tên quay lại
-        Toolbar toolbar = findViewById(R.id.toolbarDetail);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> finish());
-
-        // Ánh xạ View
         recyclerView = findViewById(R.id.recyclerViewCart);
         txtTotalPrice = findViewById(R.id.txtTotalPrice);
         btnCheckout = findViewById(R.id.btnCheckout);
+        checkboxSelectAll = findViewById(R.id.checkboxSelectAll);
+        layoutEmptyCart = findViewById(R.id.layoutEmptyCart);
 
-        // Load dữ liệu giỏ hàng
-        List<CartItem> cartItems = CartManager.getCartItems();
-        adapter = new CartAdapter(this, cartItems);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+        userId = prefs.getString("userId", "defaultUser");
 
-        updateTotalPrice();
+        loadCartFromFirebase();
+
+        checkboxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (cartList == null) return;
+            for (CartItem item : cartList) {
+                item.setSelected(isChecked);
+            }
+            adapter.notifyDataSetChanged();
+            updateTotal();
+        });
 
         btnCheckout.setOnClickListener(v -> {
-            if (cartItems.isEmpty()) {
-                Toast.makeText(this, "Giỏ hàng trống!", Toast.LENGTH_SHORT).show();
+            if (cartList == null) return;
+
+            List<CartItem> selected = new ArrayList<>();
+            for (CartItem item : cartList) {
+                if (item.isSelected()) {
+                    selected.add(item);
+                }
+            }
+
+            if (selected.isEmpty()) {
+                Toast.makeText(this, "Vui lòng chọn sản phẩm!", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
-                CartManager.clearCart();
-                updateTotalPrice();
-                adapter.notifyDataSetChanged();
-                setResult(RESULT_OK);
-                finish(); // quay về HomeActivity
+                Intent intent = new Intent(CartActivity.this, CheckoutActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    private void updateTotalPrice() {
-        double total = CartManager.getTotalPrice();
-        txtTotalPrice.setText("Tổng: " + total + " đ");
+    private void loadCartFromFirebase() {
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("cart")
+                .child(userId);
+
+        ref.get().addOnSuccessListener(snapshot -> {
+            cartList.clear();
+            for (DataSnapshot child : snapshot.getChildren()) {
+                CartItem item = child.getValue(CartItem.class);
+                if (item != null) cartList.add(item);
+            }
+
+            if (cartList.isEmpty()) {
+                showEmptyCart();
+            } else {
+                layoutEmptyCart.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                btnCheckout.setEnabled(true);
+                checkboxSelectAll.setEnabled(true);
+
+                adapter = new CartAdapter(this, cartList, () -> {
+                    updateTotal();
+                    if (cartList.isEmpty()) showEmptyCart();
+                });
+
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                recyclerView.setAdapter(adapter);
+                updateTotal();
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Lỗi khi tải giỏ hàng", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void showEmptyCart() {
+        recyclerView.setVisibility(View.GONE);
+        layoutEmptyCart.setVisibility(View.VISIBLE);
+        btnCheckout.setEnabled(false);
+        checkboxSelectAll.setEnabled(false);
+        txtTotalPrice.setText("₫0");
+        btnCheckout.setText("Mua hàng (0)");
+    }
+
+    private void updateTotal() {
+        if (cartList == null) return;
+        double total = 0;
+        int count = 0;
+        for (CartItem item : cartList) {
+            if (item.isSelected()) {
+                total += item.getPrice() * item.getQuantity();
+                count++;
+            }
+        }
+        txtTotalPrice.setText(String.format("₫%.0f", total));
+        btnCheckout.setText("Mua hàng (" + count + ")");
     }
 }

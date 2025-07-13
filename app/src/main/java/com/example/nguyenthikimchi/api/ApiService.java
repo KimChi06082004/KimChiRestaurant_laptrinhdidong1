@@ -53,4 +53,6 @@ public interface ApiService {
     // 🍲 Chi tiết món ăn
     @GET("foods/{id}")
     Call<FoodItem> getFoodById(@Path("id") String id);
+    @GET("foods")  // Tùy URL bạn tạo trên mockAPI
+    Call<List<FoodItem>> getFoodItems();
 }

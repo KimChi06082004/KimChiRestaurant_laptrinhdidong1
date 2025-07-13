@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarCheckout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#708A58"
+        android:title="Thanh toán"
+        android:titleTextColor="#FFFFFF" />
+
+    <!-- Nội dung -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Tên nhà hàng -->
+            <TextView
+                android:id="@+id/txtRestaurantName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kim Chi Restaurant"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:gravity="center" />
+
+            <!-- Đơn hàng -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đơn hàng (1 sản phẩm)"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp" />
+
+            <!-- Thông tin nhận hàng -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thông tin nhận hàng"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <EditText
+                android:hint="Email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:hint="Họ và tên"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:hint="Số điện thoại"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:hint="Địa chỉ"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <!-- Thanh toán -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thanh toán"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thanh toán khi giao hàng (COD)"
+                android:checked="true"
+                android:layout_marginTop="8dp" />
+
+            <!-- Nút đặt hàng -->
+            <Button
+                android:id="@+id/btnPlaceOrder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ĐẶT HÀNG"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="#2196F3"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

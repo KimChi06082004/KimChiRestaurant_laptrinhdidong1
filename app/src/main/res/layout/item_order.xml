@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp"
+    android:elevation="2dp">
+
+    <TextView
+        android:id="@+id/txtOrderId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mã đơn: #123456"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/txtOrderDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ngày đặt: 01/01/2025 10:00"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/txtItems"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sản phẩm: Bánh gạo x2, Tokbokki x1"
+        android:textColor="#555555"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/txtTotalAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tổng tiền: ₫80.000"
+        android:textStyle="bold"
+        android:textColor="#F44336"
+        android:textSize="15sp"
+        android:layout_marginTop="4dp" />
+</LinearLayout>

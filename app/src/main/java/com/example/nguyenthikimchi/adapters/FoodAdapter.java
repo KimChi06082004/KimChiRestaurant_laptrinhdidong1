@@ -4,9 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,7 +44,13 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         FoodItem item = foodList.get(position);
 
         holder.txtName.setText(item.getName());
-        holder.txtPrice.setText(item.getPrice() + "đ");
+
+        try {
+            double price = Double.parseDouble(item.getPrice());
+            holder.txtPrice.setText(String.format("%,.0fđ", price));
+        } catch (NumberFormatException e) {
+            holder.txtPrice.setText("N/A");
+        }
 
         if (item.getOriginalPrice() != null && !item.getOriginalPrice().isEmpty()) {
             holder.txtOldPrice.setVisibility(View.VISIBLE);

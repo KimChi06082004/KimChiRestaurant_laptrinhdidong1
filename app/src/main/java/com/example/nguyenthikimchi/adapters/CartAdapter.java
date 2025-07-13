@@ -1,27 +1,43 @@
 package com.example.nguyenthikimchi.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.example.nguyenthikimchi.ProductDetailActivity;
 import com.example.nguyenthikimchi.R;
 import com.example.nguyenthikimchi.models.CartItem;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
-    private final Context context;
-    private final List<CartItem> cartItems;
+    private Context context;
+    private List<CartItem> cartItems;
+    private OnCartItemChangeListener listener;
 
-    public CartAdapter(Context context, List<CartItem> cartItems) {
+    public interface OnCartItemChangeListener {
+        void onCartChanged();
+    }
+
+    public CartAdapter(Context context, List<CartItem> cartItems, OnCartItemChangeListener listener) {
         this.context = context;
         this.cartItems = cartItems;
+        this.listener = listener;
     }
 
     @NonNull
@@ -35,9 +51,69 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
         CartItem item = cartItems.get(position);
 
-        holder.txtName.setText(item.getName());
-        holder.txtPrice.setText("Giá: " + item.getPrice() + " đ");
-        holder.txtQuantity.setText("Số lượng: " + item.getQuantity());
+        holder.txtProductName.setText(item.getName());
+        holder.txtProductPrice.setText(String.format("₫%.0f", item.getPrice()));
+        holder.txtQuantity.setText(String.valueOf(item.getQuantity()));
+        holder.checkboxItem.setChecked(item.isSelected());
+
+        holder.txtSize.setText("Size: " + item.getSize());
+        holder.txtTopping.setText("Topping: " + item.getTopping());
+
+        Glide.with(context).load(item.getImageUrl()).into(holder.imgProduct);
+
+        holder.checkboxItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            item.setSelected(isChecked);
+            listener.onCartChanged();
+        });
+
+        holder.btnPlus.setOnClickListener(v -> {
+            item.setQuantity(item.getQuantity() + 1);
+            notifyItemChanged(position);
+            listener.onCartChanged();
+        });
+
+        holder.btnMinus.setOnClickListener(v -> {
+            if (item.getQuantity() > 1) {
+                item.setQuantity(item.getQuantity() - 1);
+                notifyItemChanged(position);
+                listener.onCartChanged();
+            }
+        });
+
+        holder.btnDelete.setOnClickListener(v -> {
+            SharedPreferences prefs = context.getSharedPreferences("MyApp", Context.MODE_PRIVATE);
+            String userId = prefs.getString("userId", "defaultUser");
+
+            String key = item.getId();
+            if (item.getSize() != null && item.getTopping() != null) {
+                key += "_" + item.getSize() + "_" + item.getTopping();
+            }
+
+            DatabaseReference cartRef = FirebaseDatabase.getInstance()
+                    .getReference("cart")
+                    .child(userId)
+                    .child(key);
+
+            cartRef.removeValue().addOnSuccessListener(unused -> {
+                cartItems.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, cartItems.size());
+                listener.onCartChanged();
+                Toast.makeText(context, "Đã xoá sản phẩm khỏi giỏ", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> {
+                Toast.makeText(context, "Lỗi khi xoá", Toast.LENGTH_SHORT).show();
+            });
+        });
+
+        // ✅ Mở trang chi tiết sản phẩm khi click item
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("foodId", item.getId());
+            intent.putExtra("size", item.getSize());
+            intent.putExtra("topping", item.getTopping());
+            intent.putExtra("quantity", item.getQuantity());
+            context.startActivity(intent);
+        });
     }
 
     @Override
@@ -45,14 +121,29 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         return cartItems.size();
     }
 
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
     public static class CartViewHolder extends RecyclerView.ViewHolder {
-        TextView txtName, txtPrice, txtQuantity;
+        CheckBox checkboxItem;
+        ImageView imgProduct;
+        TextView txtProductName, txtProductPrice, txtQuantity;
+        TextView txtSize, txtTopping;
+        Button btnPlus, btnMinus, btnDelete;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
-            txtName = itemView.findViewById(R.id.txtCartName);
-            txtPrice = itemView.findViewById(R.id.txtCartPrice);
-            txtQuantity = itemView.findViewById(R.id.txtCartQuantity);
+            checkboxItem = itemView.findViewById(R.id.checkboxItem);
+            imgProduct = itemView.findViewById(R.id.imgProduct);
+            txtProductName = itemView.findViewById(R.id.txtProductName);
+            txtProductPrice = itemView.findViewById(R.id.txtProductPrice);
+            txtQuantity = itemView.findViewById(R.id.txtQuantity);
+            txtSize = itemView.findViewById(R.id.txtSize);
+            txtTopping = itemView.findViewById(R.id.txtTopping);
+            btnPlus = itemView.findViewById(R.id.btnPlus);
+            btnMinus = itemView.findViewById(R.id.btnMinus);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

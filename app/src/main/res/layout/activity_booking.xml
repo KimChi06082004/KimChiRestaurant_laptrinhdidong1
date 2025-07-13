@@ -1,44 +1,79 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
     android:background="#2D4F2B">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Đặt bàn"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#0277BD"
-        android:layout_gravity="center"
-        android:paddingBottom="16dp" />
-
-    <EditText
+    <!-- ✅ Toolbar có nút quay lại -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarBooking"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Họ tên"
-        android:inputType="textPersonName" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="#708A58"
+        android:title="Đặt bàn"
+        android:titleTextColor="#FFFFFF"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <EditText
+    <!-- Nội dung form đặt bàn -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Số điện thoại"
-        android:inputType="phone"
-        android:layout_marginTop="8dp" />
+        android:layout_height="match_parent">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Số người"
-        android:inputType="number"
-        android:layout_marginTop="8dp" />
+        <LinearLayout
+            android:padding="24dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Gửi yêu cầu"
-        android:layout_marginTop="16dp" />
+            <EditText
+                android:id="@+id/edtFullName"
+                android:hint="Họ và tên"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <EditText
+                android:id="@+id/edtPhone"
+                android:hint="Số điện thoại"
+                android:inputType="phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"/>
+
+            <EditText
+                android:id="@+id/edtDate"
+                android:hint="Ngày đặt (dd/MM/yyyy)"
+                android:focusable="false"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"/>
+
+            <EditText
+                android:id="@+id/edtTime"
+                android:hint="Giờ đặt (HH:mm)"
+                android:focusable="false"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"/>
+
+            <EditText
+                android:id="@+id/edtPeople"
+                android:hint="Số người"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"/>
+
+            <Button
+                android:id="@+id/btnBook"
+                android:text="Đặt bàn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"/>
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

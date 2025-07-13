@@ -1,6 +1,7 @@
 package com.example.nguyenthikimchi;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
@@ -16,10 +17,13 @@ import com.example.nguyenthikimchi.adapters.BannerAdapter;
 import com.example.nguyenthikimchi.adapters.FoodAdapter;
 import com.example.nguyenthikimchi.api.ApiService;
 import com.example.nguyenthikimchi.api.RetrofitClient;
+import com.example.nguyenthikimchi.models.CartItem;
 import com.example.nguyenthikimchi.models.FoodItem;
-import com.example.nguyenthikimchi.utils.CartManager;
 import com.example.nguyenthikimchi.utils.FavoriteManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +43,7 @@ public class HomeActivity extends AppCompatActivity {
     private final List<FoodItem> foodList = new ArrayList<>();
     private List<FoodItem> allFoods = new ArrayList<>();
 
-    private Button btnKhaiVi, btnMonChinh, btnCanh, btnCom;
+    private Button btnKhaiVi, btnMonChinh, btnCanh, btnCom, btnBookNow;
     private TextView badgeCart, badgeFavorite;
     private ImageView iconCart;
     private ActivityResultLauncher<Intent> productDetailLauncher;
@@ -59,12 +63,12 @@ public class HomeActivity extends AppCompatActivity {
         btnMonChinh = findViewById(R.id.btnMonChinh);
         btnCanh = findViewById(R.id.btnCanh);
         btnCom = findViewById(R.id.btnCom);
+        btnBookNow = findViewById(R.id.btnBookNow);
         iconCart = findViewById(R.id.iconCart);
 
         badgeCart.setVisibility(View.GONE);
         badgeFavorite.setVisibility(View.GONE);
 
-        // Hiển thị dạng lưới 2 cột
         foodRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         iconCart.setOnClickListener(v -> {
@@ -80,16 +84,13 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 });
 
-        foodAdapter = new FoodAdapter(this, foodList, new FoodAdapter.OnFoodActionListener() {
-            @Override
-            public void onFavoriteToggled(FoodItem item) {
-                int favoriteCount = FavoriteManager.getFavorites().size();
-                if (favoriteCount > 0) {
-                    badgeFavorite.setVisibility(View.VISIBLE);
-                    badgeFavorite.setText(String.valueOf(favoriteCount));
-                } else {
-                    badgeFavorite.setVisibility(View.GONE);
-                }
+        foodAdapter = new FoodAdapter(this, foodList, item -> {
+            int favoriteCount = FavoriteManager.getFavorites().size();
+            if (favoriteCount > 0) {
+                badgeFavorite.setVisibility(View.VISIBLE);
+                badgeFavorite.setText(String.valueOf(favoriteCount));
+            } else {
+                badgeFavorite.setVisibility(View.GONE);
             }
         });
 
@@ -113,6 +114,7 @@ public class HomeActivity extends AppCompatActivity {
             setActiveCategory(btnCom);
         });
 
+        // Banner
         List<Integer> bannerImages = List.of(
                 R.drawable.banner1,
                 R.drawable.banner2,
@@ -141,6 +143,11 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         updateCartBadge();
+
+        btnBookNow.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, BookingActivity.class);
+            startActivity(intent);
+        });
     }
 
     public void openProductDetail(String foodId) {
@@ -197,13 +204,37 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateCartBadge() {
-        int count = CartManager.getTotalQuantity();
-        if (count > 0) {
-            badgeCart.setVisibility(View.VISIBLE);
-            badgeCart.setText(String.valueOf(count));
-        } else {
-            badgeCart.setVisibility(View.GONE);
-        }
+        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+        String userId = prefs.getString("userId", "defaultUser");
+
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("cart")
+                .child(userId);
+
+        ref.get().addOnSuccessListener(snapshot -> {
+            int total = 0;
+            for (DataSnapshot itemSnap : snapshot.getChildren()) {
+                CartItem item = itemSnap.getValue(CartItem.class);
+                if (item != null) {
+                    total += item.getQuantity();
+                }
+            }
+
+            if (total > 0) {
+                badgeCart.setText(total > 99 ? "99+" : String.valueOf(total));
+                badgeCart.setVisibility(View.VISIBLE);
+            } else {
+                badgeCart.setVisibility(View.GONE);
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Lỗi tải giỏ hàng", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCartBadge();
     }
 
     @Override

@@ -1,28 +1,34 @@
 package com.example.nguyenthikimchi;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.widget.*;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.example.nguyenthikimchi.api.ApiService;
 import com.example.nguyenthikimchi.api.RetrofitClient;
+import com.example.nguyenthikimchi.models.CartItem;
 import com.example.nguyenthikimchi.models.FoodItem;
-import com.example.nguyenthikimchi.utils.CartManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.view.View;
 
 public class ProductDetailActivity extends AppCompatActivity {
 
     ImageView imgFood, iconCart;
     TextView txtName, txtPrice, txtOriginalPrice, txtDesc, txtIngredients, txtPortion, txtCookingTime, txtQuantity, badgeCart;
     Button btnMinus, btnPlus, btnAddToCart, btnBookNow;
+    Spinner spinnerSize, spinnerTopping;
     int quantity = 1;
     private FoodItem currentItem;
 
@@ -31,13 +37,13 @@ public class ProductDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
-        // ✅ Toolbar
+        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarDetail);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // ✅ Ánh xạ View
+        // Ánh xạ View
         imgFood = findViewById(R.id.imgDetailFood);
         txtName = findViewById(R.id.txtDetailName);
         txtPrice = findViewById(R.id.txtDetailPrice);
@@ -53,11 +59,24 @@ public class ProductDetailActivity extends AppCompatActivity {
         btnBookNow = findViewById(R.id.btnBookNow);
         iconCart = findViewById(R.id.iconCart);
         badgeCart = findViewById(R.id.badgeCart);
+        spinnerSize = findViewById(R.id.spinnerSize);
+        spinnerTopping = findViewById(R.id.spinnerTopping);
+
+        // Dữ liệu spinner
+        String[] sizes = {"Nhỏ", "Vừa", "Lớn"};
+        String[] toppings = {"Không", "Phô mai", "Trứng", "Xúc xích"};
+
+        ArrayAdapter<String> sizeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, sizes);
+        sizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSize.setAdapter(sizeAdapter);
+
+        ArrayAdapter<String> toppingAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, toppings);
+        toppingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTopping.setAdapter(toppingAdapter);
 
         txtQuantity.setText("1");
         txtOriginalPrice.setPaintFlags(txtOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-        // ✅ Nhận dữ liệu
         String foodId = getIntent().getStringExtra("foodId");
         if (foodId != null && !foodId.isEmpty()) {
             loadFoodDetail(foodId);
@@ -67,7 +86,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // ✅ Số lượng
         btnPlus.setOnClickListener(v -> {
             quantity++;
             txtQuantity.setText(String.valueOf(quantity));
@@ -80,46 +98,61 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         });
 
-        // ✅ Thêm vào giỏ hàng
         btnAddToCart.setOnClickListener(v -> {
             if (currentItem != null) {
-                double price = 0;
+                SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+                String userId = prefs.getString("userId", "defaultUser");
+
+                double price;
                 try {
                     price = Double.parseDouble(currentItem.getPrice());
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    Toast.makeText(this, "Lỗi giá sản phẩm", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
-                CartManager.addToCart(
-                        currentItem.getId(),
-                        currentItem.getName(),
-                        price,
-                        quantity
-                );
+                String selectedSize = spinnerSize.getSelectedItem().toString();
+                String selectedTopping = spinnerTopping.getSelectedItem().toString();
 
-                updateCartBadge();
-                Toast.makeText(this, "Đã thêm " + quantity + " vào giỏ", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
+                String key = currentItem.getId() + "_" + selectedSize + "_" + selectedTopping;
+
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("cart")
+                        .child(userId)
+                        .child(key);
+
+                ref.get().addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        CartItem existing = snapshot.getValue(CartItem.class);
+                        int newQty = existing.getQuantity() + quantity;
+                        ref.child("quantity").setValue(newQty);
+                    } else {
+                        CartItem cartItem = new CartItem(
+                                currentItem.getId(),
+                                currentItem.getName(),
+                                currentItem.getImageUrl(),
+                                price,
+                                quantity,
+                                selectedSize,
+                                selectedTopping
+                        );
+                        ref.setValue(cartItem);
+                    }
+
+                    Toast.makeText(this, "Đã thêm " + quantity + " sản phẩm vào giỏ", Toast.LENGTH_SHORT).show();
+                    updateCartBadge();
+                });
             }
         });
 
-        // ✅ Đặt bàn
-        btnBookNow.setOnClickListener(v -> {
-            Toast.makeText(this, "Chuyển sang đặt bàn...", Toast.LENGTH_SHORT).show();
-            // TODO: Mở Activity liên hệ/đặt bàn nếu có
-        });
+        btnBookNow.setOnClickListener(v -> Toast.makeText(this, "Chuyển sang đặt bàn...", Toast.LENGTH_SHORT).show());
 
-        // ✅ Click iconCart mở giỏ hàng
-        iconCart.setOnClickListener(v -> {
-            startActivity(new Intent(this, CartActivity.class));
-        });
+        iconCart.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
 
-        updateCartBadge();
+        updateCartBadge(); // 🔁 cập nhật số lượng sản phẩm trong giỏ
     }
 
     private void loadFoodDetail(String id) {
         ApiService api = RetrofitClient.getRetrofit().create(ApiService.class);
-
         api.getFoodById(id).enqueue(new Callback<FoodItem>() {
             @Override
             public void onResponse(Call<FoodItem> call, Response<FoodItem> response) {
@@ -153,12 +186,30 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void updateCartBadge() {
-        int count = CartManager.getTotalQuantity();
-        if (count > 0) {
-            badgeCart.setVisibility(View.VISIBLE);
-            badgeCart.setText(String.valueOf(count));
-        } else {
-            badgeCart.setVisibility(View.GONE);
-        }
+        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
+        String userId = prefs.getString("userId", "defaultUser");
+
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("cart")
+                .child(userId);
+
+        ref.get().addOnSuccessListener(snapshot -> {
+            int total = 0;
+            for (DataSnapshot itemSnap : snapshot.getChildren()) {
+                CartItem item = itemSnap.getValue(CartItem.class);
+                if (item != null) {
+                    total += item.getQuantity();
+                }
+            }
+
+            if (total > 0) {
+                badgeCart.setText(total > 99 ? "99+" : String.valueOf(total));
+                badgeCart.setVisibility(View.VISIBLE);
+            } else {
+                badgeCart.setVisibility(View.GONE);
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Lỗi tải giỏ hàng", Toast.LENGTH_SHORT).show();
+        });
     }
 }

@@ -160,6 +160,53 @@
                 android:textSize="16sp"
                 android:textColor="#BDBDBD" />
 
+            <!-- Spinner Size -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn size:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#FFFFFF" />
+            </LinearLayout>
+
+            <!-- Spinner Topping -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Topping:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerTopping"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#FFFFFF" />
+            </LinearLayout>
+
+            <!-- Số lượng -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -200,6 +247,7 @@
                     android:textColor="#000" />
             </LinearLayout>
 
+            <!-- Nút Thêm và Đặt bàn -->
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
