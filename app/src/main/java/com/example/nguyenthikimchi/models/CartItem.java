@@ -1,6 +1,8 @@
 package com.example.nguyenthikimchi.models;
 
-public class CartItem {
+import java.io.Serializable;
+
+public class CartItem implements Serializable {
     private String id;
     private String name;
     private String imageUrl;
@@ -11,11 +13,10 @@ public class CartItem {
     private String size;
     private String topping;
 
-    // ✅ Constructor mặc định (Firebase yêu cầu)
+    // Constructor mặc định cho Firebase
     public CartItem() {
     }
 
-    // ✅ Constructor đầy đủ (không size/topping)
     public CartItem(String id, String name, String imageUrl, double price, int quantity) {
         this.id = id;
         this.name = name;
@@ -25,7 +26,6 @@ public class CartItem {
         this.selected = false;
     }
 
-    // ✅ Constructor có size và topping
     public CartItem(String id, String name, String imageUrl, double price, int quantity, String size, String topping) {
         this.id = id;
         this.name = name;
@@ -37,7 +37,6 @@ public class CartItem {
         this.selected = false;
     }
 
-    // ✅ Constructor overload
     public CartItem(String id, String name, double price, int quantity) {
         this(id, name, "", price, quantity);
     }
@@ -80,14 +79,6 @@ public class CartItem {
         this.id = id;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -98,6 +89,14 @@ public class CartItem {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public void setSize(String size) {

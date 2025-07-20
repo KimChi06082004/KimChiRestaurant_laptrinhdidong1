@@ -18,7 +18,6 @@ public class CartManager {
         cartItems.add(new CartItem(id, name, price, quantity));
     }
 
-
     public static List<CartItem> getCartItems() {
         return cartItems;
     }

@@ -4,22 +4,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nguyenthikimchi.adapters.CartAdapter;
 import com.example.nguyenthikimchi.models.CartItem;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,6 @@ public class CartActivity extends AppCompatActivity {
 
     private List<CartItem> cartList = new ArrayList<>();
     private CartAdapter adapter;
-
     private String userId;
 
     @Override
@@ -42,6 +36,17 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
+        // ✅ Toolbar + quay lại
+        Toolbar toolbar = findViewById(R.id.toolbarDetail);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Giỏ hàng");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        // ✅ Ánh xạ view
         recyclerView = findViewById(R.id.recyclerViewCart);
         txtTotalPrice = findViewById(R.id.txtTotalPrice);
         btnCheckout = findViewById(R.id.btnCheckout);
@@ -65,7 +70,7 @@ public class CartActivity extends AppCompatActivity {
         btnCheckout.setOnClickListener(v -> {
             if (cartList == null) return;
 
-            List<CartItem> selected = new ArrayList<>();
+            ArrayList<CartItem> selected = new ArrayList<>();
             for (CartItem item : cartList) {
                 if (item.isSelected()) {
                     selected.add(item);
@@ -76,6 +81,7 @@ public class CartActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng chọn sản phẩm!", Toast.LENGTH_SHORT).show();
             } else {
                 Intent intent = new Intent(CartActivity.this, CheckoutActivity.class);
+                intent.putExtra("selectedItems", selected);
                 startActivity(intent);
             }
         });
@@ -128,13 +134,28 @@ public class CartActivity extends AppCompatActivity {
         if (cartList == null) return;
         double total = 0;
         int count = 0;
+        boolean allSelected = true;
+
         for (CartItem item : cartList) {
             if (item.isSelected()) {
                 total += item.getPrice() * item.getQuantity();
                 count++;
+            } else {
+                allSelected = false;
             }
         }
-        txtTotalPrice.setText(String.format("₫%.0f", total));
+
+        checkboxSelectAll.setOnCheckedChangeListener(null);
+        checkboxSelectAll.setChecked(allSelected);
+        checkboxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            for (CartItem item : cartList) {
+                item.setSelected(isChecked);
+            }
+            adapter.notifyDataSetChanged();
+            updateTotal();
+        });
+
+        txtTotalPrice.setText("₫" + (int) total);
         btnCheckout.setText("Mua hàng (" + count + ")");
     }
 }

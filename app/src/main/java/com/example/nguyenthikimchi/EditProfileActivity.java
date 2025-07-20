@@ -1,16 +1,29 @@
 package com.example.nguyenthikimchi;
-import com.example.nguyenthikimchi.R;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
-import android.widget.*;
+import android.provider.MediaStore;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
 import com.example.nguyenthikimchi.api.ApiService;
 import com.example.nguyenthikimchi.api.RetrofitClient;
 import com.example.nguyenthikimchi.models.User;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.Calendar;
 import java.util.List;
@@ -18,6 +31,9 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.result.ActivityResult;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -27,6 +43,15 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private SharedPreferences prefs;
     private String username;
+    private Uri imageUri;
+
+    private final ActivityResultLauncher<Intent> pickImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    imageUri = result.getData().getData();
+                    imgAvatar.setImageURI(imageUri);
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +62,15 @@ public class EditProfileActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Sửa hồ sơ");
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         username = prefs.getString("username", "");
 
-        // Ánh xạ view
         edtName = findViewById(R.id.edtName);
-        edtPassword = findViewById(R.id.edtPassword); // Thêm dòng này
+        edtPassword = findViewById(R.id.edtPassword);
         edtGender = findViewById(R.id.edtGender);
         edtBirth = findViewById(R.id.edtBirth);
         edtPhone = findViewById(R.id.edtPhone);
@@ -53,14 +78,15 @@ public class EditProfileActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSaveProfile);
         imgAvatar = findViewById(R.id.imgAvatarEdit);
 
-
-        // Ngày sinh: mở DatePicker
         edtBirth.setOnClickListener(v -> showDatePicker());
 
-        // Tải dữ liệu người dùng
+        imgAvatar.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickImageLauncher.launch(intent);
+        });
+
         fetchUserInfo();
 
-        // Cập nhật hồ sơ
         btnSave.setOnClickListener(v -> updateProfile());
     }
 
@@ -83,24 +109,28 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    User user = response.body().get(0); // lấy user đầu tiên từ danh sách
+                    User user = response.body().get(0);
                     edtName.setText(user.getName());
                     edtPassword.setText(user.getPassword());
-                    edtGender.setText(user.getGender());
-                    edtBirth.setText(user.getBirthdate());
-                    edtPhone.setText(user.getPhone());
-                    edtEmail.setText(user.getEmail());
+                    edtGender.setText(isEmpty(user.getGender()) ? "Chưa cập nhật" : user.getGender());
+                    edtBirth.setText(isEmpty(user.getBirthdate()) ? "Chưa cập nhật" : user.getBirthdate());
+                    edtPhone.setText(isEmpty(user.getPhone()) ? "Chưa cập nhật" : user.getPhone());
+                    edtEmail.setText(isEmpty(user.getEmail()) ? "Chưa cập nhật" : user.getEmail());
+
+                    String avatarUrl = prefs.getString("avatar_url", "");
+                    if (!avatarUrl.isEmpty()) {
+                        Glide.with(EditProfileActivity.this).load(avatarUrl).into(imgAvatar);
+                    }
                 } else {
-                    Toast.makeText(EditProfileActivity.this, "Không tải được dữ liệu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditProfileActivity.this, "Không tải được thông tin người dùng", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
-                Toast.makeText(EditProfileActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditProfileActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private void updateProfile() {
@@ -117,16 +147,21 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         User user = new User(username, password, name, gender, birth, phone, email);
-
         ApiService api = RetrofitClient.getRetrofit().create(ApiService.class);
         api.updateUser(username, user).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
+                    if (imageUri != null) {
+                        uploadAvatarToFirebase(imageUri);
+                    }
+                    prefs.edit().putString("user_name", name).apply();
                     Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                    finish(); // Quay về trang trước
+                    setResult(RESULT_OK);
+                    finish();
+
                 } else {
-                    Toast.makeText(EditProfileActivity.this, "Lỗi khi cập nhật", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditProfileActivity.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -135,5 +170,25 @@ public class EditProfileActivity extends AppCompatActivity {
                 Toast.makeText(EditProfileActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void uploadAvatarToFirebase(Uri imageUri) {
+        StorageReference storageRef = FirebaseStorage.getInstance()
+                .getReference("avatars/" + username + ".jpg");
+
+        storageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl()
+                        .addOnSuccessListener(uri -> {
+                            String downloadUrl = uri.toString();
+                            prefs.edit().putString("avatar_url", downloadUrl).apply();
+                            Glide.with(EditProfileActivity.this).load(downloadUrl).into(imgAvatar);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(this, "Lỗi URL", Toast.LENGTH_SHORT).show())
+                )
+                .addOnFailureListener(e -> Toast.makeText(this, "Upload thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

@@ -3,6 +3,8 @@ package com.example.nguyenthikimchi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.*;
 
@@ -44,7 +46,7 @@ public class HomeActivity extends AppCompatActivity {
     private List<FoodItem> allFoods = new ArrayList<>();
 
     private Button btnKhaiVi, btnMonChinh, btnCanh, btnCom, btnBookNow;
-    private TextView badgeCart, badgeFavorite;
+    private TextView badgeCart, badgeFavorite, txtNotFound;
     private ImageView iconCart;
     private ActivityResultLauncher<Intent> productDetailLauncher;
 
@@ -53,7 +55,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Ánh xạ
         bannerSlider = findViewById(R.id.bannerSlider);
         foodRecyclerView = findViewById(R.id.foodRecyclerView);
         searchInput = findViewById(R.id.searchInput);
@@ -65,9 +66,11 @@ public class HomeActivity extends AppCompatActivity {
         btnCom = findViewById(R.id.btnCom);
         btnBookNow = findViewById(R.id.btnBookNow);
         iconCart = findViewById(R.id.iconCart);
+        txtNotFound = findViewById(R.id.txtNotFound); // Add this TextView to activity_home.xml
 
         badgeCart.setVisibility(View.GONE);
         badgeFavorite.setVisibility(View.GONE);
+        txtNotFound.setVisibility(View.GONE);
 
         foodRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
@@ -96,7 +99,19 @@ public class HomeActivity extends AppCompatActivity {
 
         foodRecyclerView.setAdapter(foodAdapter);
 
-        // Danh mục
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterFoodList(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         btnKhaiVi.setOnClickListener(v -> {
             filterByCategory("Khai vị");
             setActiveCategory(btnKhaiVi);
@@ -114,7 +129,6 @@ public class HomeActivity extends AppCompatActivity {
             setActiveCategory(btnCom);
         });
 
-        // Banner
         List<Integer> bannerImages = List.of(
                 R.drawable.banner1,
                 R.drawable.banner2,
@@ -128,6 +142,12 @@ public class HomeActivity extends AppCompatActivity {
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
+                foodList.clear();
+                foodList.addAll(allFoods);
+                foodAdapter.notifyDataSetChanged();
+                searchInput.setText("");
+                txtNotFound.setVisibility(View.GONE);
+                setActiveCategory(null);
                 return true;
             } else if (id == R.id.nav_favorite) {
                 startActivity(new Intent(this, FavoriteActivity.class));
@@ -193,6 +213,20 @@ public class HomeActivity extends AppCompatActivity {
         foodList.clear();
         foodList.addAll(filtered);
         foodAdapter.notifyDataSetChanged();
+        txtNotFound.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void filterFoodList(String keyword) {
+        List<FoodItem> filteredList = new ArrayList<>();
+        for (FoodItem item : allFoods) {
+            if (item.getName().toLowerCase().contains(keyword.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        foodList.clear();
+        foodList.addAll(filteredList);
+        foodAdapter.notifyDataSetChanged();
+        txtNotFound.setVisibility(filteredList.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void setActiveCategory(Button selectedButton) {
@@ -200,7 +234,9 @@ public class HomeActivity extends AppCompatActivity {
         btnMonChinh.setBackgroundResource(R.drawable.chip_unselected);
         btnCanh.setBackgroundResource(R.drawable.chip_unselected);
         btnCom.setBackgroundResource(R.drawable.chip_unselected);
-        selectedButton.setBackgroundResource(R.drawable.chip_selected);
+        if (selectedButton != null) {
+            selectedButton.setBackgroundResource(R.drawable.chip_selected);
+        }
     }
 
     private void updateCartBadge() {

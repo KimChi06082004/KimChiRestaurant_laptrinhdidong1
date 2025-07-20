@@ -19,6 +19,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DecimalFormat;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,13 +39,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
-        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarDetail);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Xem chi tiết");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Ánh xạ View
         imgFood = findViewById(R.id.imgDetailFood);
         txtName = findViewById(R.id.txtDetailName);
         txtPrice = findViewById(R.id.txtDetailPrice);
@@ -62,7 +66,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         spinnerSize = findViewById(R.id.spinnerSize);
         spinnerTopping = findViewById(R.id.spinnerTopping);
 
-        // Dữ liệu spinner
         String[] sizes = {"Nhỏ", "Vừa", "Lớn"};
         String[] toppings = {"Không", "Phô mai", "Trứng", "Xúc xích"};
 
@@ -74,6 +77,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         toppingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTopping.setAdapter(toppingAdapter);
 
+
         txtQuantity.setText("1");
         txtOriginalPrice.setPaintFlags(txtOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -83,7 +87,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Món ăn không hợp lệ", Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
 
         btnPlus.setOnClickListener(v -> {
@@ -105,7 +108,9 @@ public class ProductDetailActivity extends AppCompatActivity {
 
                 double price;
                 try {
-                    price = Double.parseDouble(currentItem.getPrice());
+                    String rawPrice = currentItem.getPrice();
+                    String cleaned = rawPrice.replace(".", "").replace(",", "");
+                    price = Double.parseDouble(cleaned);
                 } catch (Exception e) {
                     Toast.makeText(this, "Lỗi giá sản phẩm", Toast.LENGTH_SHORT).show();
                     return;
@@ -113,12 +118,10 @@ public class ProductDetailActivity extends AppCompatActivity {
 
                 String selectedSize = spinnerSize.getSelectedItem().toString();
                 String selectedTopping = spinnerTopping.getSelectedItem().toString();
-
                 String key = currentItem.getId() + "_" + selectedSize + "_" + selectedTopping;
 
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("cart")
-                        .child(userId)
-                        .child(key);
+                        .child(userId).child(key);
 
                 ref.get().addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
@@ -135,6 +138,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 selectedSize,
                                 selectedTopping
                         );
+
                         ref.setValue(cartItem);
                     }
 
@@ -145,10 +149,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         });
 
         btnBookNow.setOnClickListener(v -> Toast.makeText(this, "Chuyển sang đặt bàn...", Toast.LENGTH_SHORT).show());
-
         iconCart.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
-
-        updateCartBadge(); // 🔁 cập nhật số lượng sản phẩm trong giỏ
+        updateCartBadge();
     }
 
     private void loadFoodDetail(String id) {
@@ -161,7 +163,16 @@ public class ProductDetailActivity extends AppCompatActivity {
                     currentItem = item;
 
                     txtName.setText(item.getName());
-                    txtPrice.setText(item.getPrice() + "đ");
+
+                    try {
+                        String cleaned = item.getPrice().replace(".", "").replace(",", "");
+                        double price = Double.parseDouble(cleaned);
+                        DecimalFormat formatter = new DecimalFormat("#,###");
+                        txtPrice.setText(formatter.format(price) + "đ");
+                    } catch (Exception e) {
+                        txtPrice.setText(item.getPrice() + "đ");
+                    }
+
                     txtOriginalPrice.setText(item.getOriginalPrice() + "đ");
                     txtDesc.setText(item.getDescription());
                     txtIngredients.setText("Thành phần: " + item.getIngredients());

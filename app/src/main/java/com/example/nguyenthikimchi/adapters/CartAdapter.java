@@ -22,6 +22,7 @@ import com.example.nguyenthikimchi.models.CartItem;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DatabaseReference;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
@@ -52,7 +53,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartItem item = cartItems.get(position);
 
         holder.txtProductName.setText(item.getName());
-        holder.txtProductPrice.setText(String.format("₫%.0f", item.getPrice()));
+
+        // ✅ Không còn xử lý chuỗi nữa, vì price là double
+        double price = item.getPrice();
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        holder.txtProductPrice.setText("₫" + formatter.format(price));
+
         holder.txtQuantity.setText(String.valueOf(item.getQuantity()));
         holder.checkboxItem.setChecked(item.isSelected());
 
@@ -65,6 +71,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             item.setSelected(isChecked);
             listener.onCartChanged();
         });
+
 
         holder.btnPlus.setOnClickListener(v -> {
             item.setQuantity(item.getQuantity() + 1);
@@ -105,7 +112,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             });
         });
 
-        // ✅ Mở trang chi tiết sản phẩm khi click item
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
             intent.putExtra("foodId", item.getId());

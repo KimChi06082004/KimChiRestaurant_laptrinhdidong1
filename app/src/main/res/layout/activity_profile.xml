@@ -2,83 +2,60 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="#2D4F2B"
-    android:padding="24dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#2D4F2B">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarProfile"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#D3ECCD"
-        android:title="Trang cá nhân"
-        android:titleTextColor="#FFFFFF"/>
-
-    <!-- Avatar + Username -->
+    <!-- Phần nền xanh -->
     <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp"
+        android:orientation="vertical"
         android:background="#D3ECCD"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/imgAvatar"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@drawable/ic_person"
-            android:background="@android:color/white"
-            android:padding="8dp"
-            android:layout_marginEnd="12dp"
-            android:contentDescription="Avatar"
-            android:clickable="true"
-            android:focusable="true" />
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarProfile"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#D3ECCD"
+            android:title="Trang cá nhân"
+            android:titleTextColor="#000000"/>
 
-        <TextView
-            android:id="@+id/tvUsername"
-            android:text="Tên người dùng"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"/>
+        <!-- Avatar + Tên người dùng -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <ImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_person"
+                android:background="@android:color/white"
+                android:padding="8dp"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Avatar"/>
 
+            <TextView
+                android:id="@+id/tvUsername"
+                android:text="gin6804"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Buttons -->
-    <Button
-        android:id="@+id/btnEditProfile"
-        android:text="Chỉnh sửa trang cá nhân"
+    <!-- Danh sách chức năng -->
+    <ListView
+        android:id="@+id/listOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
-
-    <Button
-        android:id="@+id/btnOrderHistory"
-        android:text="Quản lý đơn hàng"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
-
-    <Button
-        android:id="@+id/btnLogout"
-        android:text="Đăng xuất"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"/>
-    <Button
-        android:id="@+id/btnDeleteAccount"
-        android:text="Xóa tài khoản"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#FF4444"
-        android:textColor="#FFFFFF"/>
-
+        android:divider="#CCCCCC"
+        android:dividerHeight="1dp"/>
 </LinearLayout>

@@ -44,7 +44,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_favorite"
-                android:background="@drawable/bg_circle"
+                android:background="@drawable/bg_circle_white"
                 android:padding="6dp"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
