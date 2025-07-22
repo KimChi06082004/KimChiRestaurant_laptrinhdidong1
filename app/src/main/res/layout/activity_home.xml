@@ -226,6 +226,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
+            <!-- ✅ Thêm footer ở đây -->
+            <include layout="@layout/footer" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -238,4 +240,6 @@
         app:itemIconTint="@color/white"
         app:itemTextColor="@color/white"
         android:background="#708A58" />
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

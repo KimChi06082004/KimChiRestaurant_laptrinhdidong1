@@ -1,39 +1,42 @@
 package com.example.nguyenthikimchi;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.*;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
+import com.example.nguyenthikimchi.api.ApiService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private static final int EDIT_PROFILE_REQUEST = 100;
 
-    private TextView tvUsername;
+    private TextView tvUsername, tvDeleteAccountStyled;
     private ImageView imgAvatar;
     private SharedPreferences prefs;
+    private Button btnLoginLogout;
+    private boolean isLoggedIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarProfile);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -42,35 +45,14 @@ public class ProfileActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // SharedPreferences
         prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String username = prefs.getString("username", "");
-        boolean isLoggedIn = prefs.getBoolean("is_logged_in", false);
+        isLoggedIn = prefs.getBoolean("is_logged_in", false);
 
-        if (!isLoggedIn || username.isEmpty()) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-            return;
-        }
-
-        // Ánh xạ
         tvUsername = findViewById(R.id.tvUsername);
         imgAvatar = findViewById(R.id.imgAvatar);
         ListView listOptions = findViewById(R.id.listOptions);
-
-        // Hiển thị tên và avatar ban đầu
-        reloadUserInfo();
-
-        // Mở trang sửa hồ sơ
-        imgAvatar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditProfileActivity.class);
-            startActivityForResult(intent, EDIT_PROFILE_REQUEST);
-        });
-
-        tvUsername.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditProfileActivity.class);
-            startActivityForResult(intent, EDIT_PROFILE_REQUEST);
-        });
+        btnLoginLogout = findViewById(R.id.btnLoginLogout);
+        tvDeleteAccountStyled = findViewById(R.id.tvDeleteAccountStyled);
 
         // Danh sách chức năng
         String[] titles = {"Món yêu thích", "Thanh toán", "Địa chỉ", "Mời bạn bè"};
@@ -96,8 +78,109 @@ public class ProfileActivity extends AppCompatActivity {
                 new String[]{"title", "icon"},
                 new int[]{R.id.txtOption, R.id.imgOption}
         );
-
         listOptions.setAdapter(adapter);
+
+        listOptions.setOnItemClickListener((parent, view, position, id) -> {
+            if (position == 0) {
+                startActivity(new Intent(ProfileActivity.this, FavoriteActivity.class));
+            } else {
+                Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (isLoggedIn) {
+            btnLoginLogout.setText("Đăng xuất");
+            tvDeleteAccountStyled.setVisibility(View.VISIBLE);
+            reloadUserInfo();
+        } else {
+            tvUsername.setText("Khách chưa đăng nhập");
+            imgAvatar.setImageResource(R.drawable.ic_person);
+            btnLoginLogout.setText("Đăng ký / Đăng nhập");
+            tvDeleteAccountStyled.setVisibility(View.VISIBLE);
+        }
+
+        imgAvatar.setOnClickListener(v -> {
+            if (isLoggedIn)
+                startActivityForResult(new Intent(this, EditProfileActivity.class), EDIT_PROFILE_REQUEST);
+        });
+
+        tvUsername.setOnClickListener(v -> {
+            if (isLoggedIn)
+                startActivityForResult(new Intent(this, EditProfileActivity.class), EDIT_PROFILE_REQUEST);
+        });
+
+        // Xử lý nút đăng nhập / đăng xuất
+        btnLoginLogout.setOnClickListener(v -> {
+            if (isLoggedIn) {
+                // ✅ Hiển thị loading khi đăng xuất
+                ProgressDialog progressDialog = new ProgressDialog(ProfileActivity.this);
+                progressDialog.setMessage("Đang đăng xuất...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                new android.os.Handler().postDelayed(() -> {
+                    prefs.edit().clear().apply();
+                    progressDialog.dismiss();
+                    Toast.makeText(ProfileActivity.this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }, 1500);
+
+            } else {
+                new AlertDialog.Builder(ProfileActivity.this)
+                        .setTitle("Đăng ký / Đăng nhập")
+                        .setMessage("Bạn cần đăng ký hoặc đăng nhập để sử dụng đầy đủ tính năng.")
+                        .setPositiveButton("Tiếp tục", (dialog, which) -> {
+                            Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+                            intent.putExtra("from_profile", true);
+                            startActivity(intent);
+                        })
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            }
+        });
+
+        // Xử lý xóa tài khoản
+        tvDeleteAccountStyled.setOnClickListener(v -> {
+            tvDeleteAccountStyled.setPaintFlags(tvDeleteAccountStyled.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+            if (!isLoggedIn) {
+                Toast.makeText(this, "Bạn chưa có tài khoản", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            new AlertDialog.Builder(ProfileActivity.this)
+                    .setTitle("Xác nhận xóa tài khoản")
+                    .setMessage("Bạn có chắc muốn xóa tài khoản không?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+                        String userId = prefs.getString("user_id", "");
+                        if (!userId.isEmpty()) {
+                            ApiService.api.deleteUser(userId).enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    if (response.isSuccessful()) {
+                                        prefs.edit().clear().apply();
+                                        Toast.makeText(ProfileActivity.this, "Tài khoản đã bị xóa", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(ProfileActivity.this, HomeActivity.class));
+                                        finish();
+                                    } else {
+                                        Toast.makeText(ProfileActivity.this, "Không thể xóa tài khoản", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Toast.makeText(ProfileActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+        });
     }
 
     private void reloadUserInfo() {
@@ -114,7 +197,7 @@ public class ProfileActivity extends AppCompatActivity {
                     .placeholder(R.drawable.ic_person)
                     .into(imgAvatar);
         } else {
-            imgAvatar.setImageResource(R.drawable.ic_person); // fallback
+            imgAvatar.setImageResource(R.drawable.ic_person);
         }
     }
 

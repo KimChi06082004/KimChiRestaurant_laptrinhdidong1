@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Nền xanh với góc bo -->
+    <path
+        android:fillColor="#0084FF"
+        android:pathData="M120,0h272c66.3,0 120,53.7 120,120v272c0,66.3 -53.7,120 -120,120H120C53.7,512 0,458.3 0,392V120C0,53.7 53.7,0 120,0z" />
+
+    <!-- Bong bo góc dưới trái như Zalo logo -->
+    <path
+        android:fillColor="#006FE6"
+        android:pathData="M0,392c0,32 11.5,61.1 30.4,83.5c2.8,3.3 0.8,8.3 -3.4,9.3l112.1,25.8c20.2,-1.5 39.4,-6.4 57.2,-14.5l46.2,-20.7C197.5,470.4 0,300 0,300V392z" />
+
+    <!-- Text 'Zalo' cách điệu -->
+    <group android:translateX="80" android:translateY="180">
+        <!-- Z -->
+        <path android:fillColor="#FFFFFF" android:pathData="M0,0h80l-80,80h80v20h-100v-20l80,-80h-60z" />
+        <!-- a -->
+        <path android:fillColor="#FFFFFF" android:pathData="M110,45a35,35 0 1,0 70,0a35,35 0 1,0 -70,0z M145,70a25,25 0 1,1 0,-50a25,25 0 1,1 0,50z" />
+        <!-- l -->
+        <path android:fillColor="#FFFFFF" android:pathData="M200,0h20v100h-20z" />
+        <!-- o -->
+        <path android:fillColor="#FFFFFF" android:pathData="M240,45a35,35 0 1,0 70,0a35,35 0 1,0 -70,0z M275,70a25,25 0 1,1 0,-50a25,25 0 1,1 0,50z" />
+    </group>
+</vector>

@@ -4,8 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2D4F2B"
-    >
+    android:background="#2D4F2B">
 
     <!-- 🔹 Toolbar -->
     <androidx.appcompat.widget.Toolbar
@@ -16,31 +15,17 @@
         app:title="Món ăn yêu thích"
         app:titleTextColor="#FFFFFF"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Title" />
-    <TextView
-        android:id="@+id/tvUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tên người dùng"
-        android:textColor="#000"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"/>
-
-    <ImageView
-        android:id="@+id/imgAvatar"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/ic_default_avatar"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:scaleType="centerCrop"/>
 
     <!-- 🔹 Danh sách món yêu thích -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFavorites"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:padding="8dp"
         android:clipToPadding="false" />
 
+    <!-- 🔹 Footer -->
+    <include layout="@layout/footer" />
 
 </LinearLayout>

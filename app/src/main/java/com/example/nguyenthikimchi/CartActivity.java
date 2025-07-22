@@ -70,6 +70,16 @@ public class CartActivity extends AppCompatActivity {
         btnCheckout.setOnClickListener(v -> {
             if (cartList == null) return;
 
+            // ✅ Kiểm tra đăng nhập trước khi thanh toán
+            SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            boolean isLoggedIn = userPrefs.getBoolean("is_logged_in", false);
+
+            if (!isLoggedIn) {
+                Toast.makeText(this, "Bạn chưa đăng nhập!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, ProfileActivity.class));
+                return;
+            }
+
             ArrayList<CartItem> selected = new ArrayList<>();
             for (CartItem item : cartList) {
                 if (item.isSelected()) {

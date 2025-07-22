@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#2D4F2B">
 
-    <!-- ✅ Toolbar trên cùng -->
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarDetail"
         android:layout_width="0dp"
@@ -18,49 +18,62 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- ✅ RecyclerView: Danh sách sản phẩm -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewCart"
+    <!-- ✅ Nội dung scroll được: bọc recycler + empty + footer -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="4dp"
-        android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/toolbarDetail"
-        app:layout_constraintBottom_toTopOf="@id/summaryLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- ✅ View thông báo khi giỏ hàng trống -->
-    <LinearLayout
-        android:id="@+id/layoutEmptyCart"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/toolbarDetail"
         app:layout_constraintBottom_toTopOf="@id/summaryLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/imgEmptyCart"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_empty_cart"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:id="@+id/txtEmptyCart"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Giỏ hàng của bạn đang trống"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="italic"/>
-    </LinearLayout>
+            android:orientation="vertical">
 
-    <!-- ✅ Footer: Tổng tiền + nút Mua hàng -->
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:clipToPadding="false" />
+
+            <!-- Empty cart -->
+            <LinearLayout
+                android:id="@+id/layoutEmptyCart"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/imgEmptyCart"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_empty_cart"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:id="@+id/txtEmptyCart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Giỏ hàng của bạn đang trống"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="italic"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Tổng tiền + nút mua -->
     <LinearLayout
         android:id="@+id/summaryLayout"
         android:layout_width="match_parent"

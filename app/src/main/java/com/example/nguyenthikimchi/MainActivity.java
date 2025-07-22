@@ -20,6 +20,7 @@ import com.example.nguyenthikimchi.api.RetrofitClient;
 import com.example.nguyenthikimchi.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -43,20 +44,17 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
-        // ✅ Nếu đã đăng nhập thì vào Home luôn
-        if (sharedPreferences.getBoolean("is_logged_in", false)) {
-            String username = sharedPreferences.getString("username", "");
-            startHome(username);
+        // ✅ Chỉ cho phép vào MainActivity nếu được gọi từ ProfileActivity
+        boolean isFromProfile = getIntent().getBooleanExtra("from_profile", false);
+        if (!isFromProfile) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
             return;
         }
 
         initViews();
         setupListeners();
         setupGradientAndAnimation();
-
-        boolean showRegister = getIntent().getBooleanExtra("show_register", false);
-        cardLogin.setVisibility(showRegister ? View.GONE : View.VISIBLE);
-        cardRegister.setVisibility(showRegister ? View.VISIBLE : View.GONE);
     }
 
     private void initViews() {
@@ -83,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             cardRegister.setVisibility(View.VISIBLE);
         });
 
-        // 🔐 Xử lý đăng ký tài khoản
         btnRegister.setOnClickListener(v -> {
             String username = etRegisterUsername.getText().toString().trim();
             String password = etRegisterPassword.getText().toString().trim();
@@ -100,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                         Toast.makeText(MainActivity.this, "Tên tài khoản đã tồn tại", Toast.LENGTH_SHORT).show();
                     } else {
-                        // ✅ Tiến hành đăng ký
                         User newUser = new User(username, password);
                         api.register(newUser).enqueue(new Callback<User>() {
                             @Override
@@ -129,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
             });
         });
 
-        // 🔐 Xử lý đăng nhập
         btnLogin.setOnClickListener(v -> {
             String username = etLoginUsername.getText().toString().trim();
             String password = etLoginPassword.getText().toString().trim();
@@ -148,9 +143,16 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                         User user = response.body().get(0);
 
+                        String oldUserId = sharedPreferences.getString("user_id", "defaultUser");
+                        FirebaseDatabase.getInstance()
+                                .getReference("cart")
+                                .child(oldUserId)
+                                .removeValue();
+
                         sharedPreferences.edit()
                                 .putBoolean("is_logged_in", true)
                                 .putString("username", user.getUsername())
+                                .putString("user_id", user.getId())
                                 .apply();
 
                         Toast.makeText(MainActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();

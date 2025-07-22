@@ -1,19 +1,19 @@
 package com.example.nguyenthikimchi.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.nguyenthikimchi.HomeActivity;
+import com.example.nguyenthikimchi.ProductDetailActivity;
 import com.example.nguyenthikimchi.R;
 import com.example.nguyenthikimchi.models.FoodItem;
 import com.example.nguyenthikimchi.utils.FavoriteManager;
@@ -24,12 +24,16 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     private final Context context;
     private List<FoodItem> foodList;
-    private final OnFoodActionListener listener;
+    private final OnFoodClickListener clickListener;
+    private final OnFoodActionListener actionListener;
 
-    public FoodAdapter(Context context, List<FoodItem> foodList, OnFoodActionListener listener) {
+    public FoodAdapter(Context context, List<FoodItem> foodList,
+                       OnFoodClickListener clickListener,
+                       OnFoodActionListener actionListener) {
         this.context = context;
         this.foodList = foodList;
-        this.listener = listener;
+        this.clickListener = clickListener;
+        this.actionListener = actionListener;
     }
 
     @NonNull
@@ -70,18 +74,19 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
                 .load(item.getImageUrl())
                 .into(holder.imgFood);
 
+        // ✅ Nhấn nút Xem chi tiết
         holder.btnDetail.setOnClickListener(v -> {
-            if (item.getId() != null) {
-                if (context instanceof HomeActivity) {
-                    ((HomeActivity) context).openProductDetail(item.getId());
-                } else {
-                    Toast.makeText(context, "Không thể mở chi tiết (context không hợp lệ)", Toast.LENGTH_SHORT).show();
-                }
+            if (clickListener != null) {
+                clickListener.onFoodClick(item);
             } else {
-                Toast.makeText(context, "Không thể mở chi tiết món ăn (ID rỗng)", Toast.LENGTH_SHORT).show();
+                // fallback → mở ProductDetailActivity với foodId
+                Intent intent = new Intent(context, ProductDetailActivity.class);
+                intent.putExtra("foodId", item.getId());
+                context.startActivity(intent);
             }
         });
 
+        // Nút yêu thích
         holder.btnFavorite.setImageResource(
                 item.isFavorite() ? R.drawable.ic_favorite_filled : R.drawable.ic_favorite
         );
@@ -90,8 +95,9 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
             item.setFavorite(!item.isFavorite());
             FavoriteManager.toggleFavorite(item);
             notifyItemChanged(position);
-            if (listener != null) {
-                listener.onFavoriteToggled(item);
+
+            if (actionListener != null) {
+                actionListener.onFavoriteToggled(item);
             }
         });
     }
@@ -129,6 +135,12 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         }
     }
 
+    // Interface sự kiện: mở chi tiết
+    public interface OnFoodClickListener {
+        void onFoodClick(FoodItem item);
+    }
+
+    // Interface sự kiện: thay đổi yêu thích
     public interface OnFoodActionListener {
         void onFavoriteToggled(FoodItem item);
     }

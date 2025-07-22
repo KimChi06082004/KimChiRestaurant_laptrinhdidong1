@@ -55,6 +55,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Ánh xạ
         bannerSlider = findViewById(R.id.bannerSlider);
         foodRecyclerView = findViewById(R.id.foodRecyclerView);
         searchInput = findViewById(R.id.searchInput);
@@ -66,7 +67,7 @@ public class HomeActivity extends AppCompatActivity {
         btnCom = findViewById(R.id.btnCom);
         btnBookNow = findViewById(R.id.btnBookNow);
         iconCart = findViewById(R.id.iconCart);
-        txtNotFound = findViewById(R.id.txtNotFound); // Add this TextView to activity_home.xml
+        txtNotFound = findViewById(R.id.txtNotFound);
 
         badgeCart.setVisibility(View.GONE);
         badgeFavorite.setVisibility(View.GONE);
@@ -74,11 +75,13 @@ public class HomeActivity extends AppCompatActivity {
 
         foodRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
+        // Nhấn vào giỏ hàng
         iconCart.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, CartActivity.class);
             startActivityForResult(intent, CART_REQUEST_CODE);
         });
 
+        // Launcher để mở chi tiết món ăn và nhận kết quả quay lại
         productDetailLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -87,31 +90,42 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 });
 
-        foodAdapter = new FoodAdapter(this, foodList, item -> {
-            int favoriteCount = FavoriteManager.getFavorites().size();
-            if (favoriteCount > 0) {
-                badgeFavorite.setVisibility(View.VISIBLE);
-                badgeFavorite.setText(String.valueOf(favoriteCount));
-            } else {
-                badgeFavorite.setVisibility(View.GONE);
-            }
-        });
+        // ✅ SỬA: Truyền đủ 4 tham số vào FoodAdapter
+        foodAdapter = new FoodAdapter(this, foodList,
+                item -> {
+                    Intent intent = new Intent(HomeActivity.this, ProductDetailActivity.class);
+                    intent.putExtra("foodId", item.getId());
+                    productDetailLauncher.launch(intent);
+                },
+                item -> {
+                    if (item.isFavorite()) {
+                        FavoriteManager.addFavorite(item);
+                    } else {
+                        FavoriteManager.removeFavorite(item.getId());
+                    }
+
+                    int favoriteCount = FavoriteManager.getFavorites().size();
+                    if (favoriteCount > 0) {
+                        badgeFavorite.setVisibility(View.VISIBLE);
+                        badgeFavorite.setText(String.valueOf(favoriteCount));
+                    } else {
+                        badgeFavorite.setVisibility(View.GONE);
+                    }
+                });
 
         foodRecyclerView.setAdapter(foodAdapter);
 
+        // Tìm kiếm
         searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filterFoodList(s.toString());
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
         });
 
+        // Bộ lọc theo loại món ăn
         btnKhaiVi.setOnClickListener(v -> {
             filterByCategory("Khai vị");
             setActiveCategory(btnKhaiVi);
@@ -129,6 +143,7 @@ public class HomeActivity extends AppCompatActivity {
             setActiveCategory(btnCom);
         });
 
+        // Slider ảnh banner
         List<Integer> bannerImages = List.of(
                 R.drawable.banner1,
                 R.drawable.banner2,
@@ -136,8 +151,10 @@ public class HomeActivity extends AppCompatActivity {
         );
         bannerSlider.setAdapter(new BannerAdapter(this, bannerImages));
 
+        // Gọi API lấy món ăn
         fetchAllFoods();
 
+        // Bottom menu
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -162,12 +179,12 @@ public class HomeActivity extends AppCompatActivity {
             return false;
         });
 
-        updateCartBadge();
-
         btnBookNow.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, BookingActivity.class);
             startActivity(intent);
         });
+
+        updateCartBadge();
     }
 
     public void openProductDetail(String foodId) {
@@ -178,7 +195,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void fetchAllFoods() {
         ApiService apiService = RetrofitClient.getRetrofit().create(ApiService.class);
-        Call<List<FoodItem>> call = apiService.getAllFoods(1, 100);
+        Call<List<FoodItem>> call = apiService.getAllFoods(1, 10);
 
         call.enqueue(new Callback<List<FoodItem>>() {
             @Override

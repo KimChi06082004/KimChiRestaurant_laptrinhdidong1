@@ -148,7 +148,11 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         });
 
-        btnBookNow.setOnClickListener(v -> Toast.makeText(this, "Chuyển sang đặt bàn...", Toast.LENGTH_SHORT).show());
+        btnBookNow.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductDetailActivity.this, BookingActivity.class);
+            startActivity(intent);
+        });
+
         iconCart.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
         updateCartBadge();
     }

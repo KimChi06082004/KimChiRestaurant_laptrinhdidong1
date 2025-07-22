@@ -303,6 +303,9 @@
                 android:layout_height="wrap_content"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp" />
+
         </LinearLayout>
     </ScrollView>
+    <include
+        layout="@layout/footer" />
 </LinearLayout>
